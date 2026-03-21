@@ -14,6 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // Header configs
   const showHeaderLogo = !isAdmin;
   const showNotification = isAuthenticated;
+  const showCart = isAuthenticated && !isAdmin;
   const showAvatarMenu = true;
 
   return (
@@ -26,6 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             showSidebarTrigger={showSidebar}
             showAvatarMenu={showAvatarMenu}
             showHeaderLogo={showHeaderLogo}
+            showCart={showCart}
             showNotification={showNotification}
           />
 

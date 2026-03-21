@@ -9,22 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ProductsRouteImport } from './routes/products'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthViewRouteImport } from './routes/$authView'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUserRouteImport } from './routes/_authenticated/_user'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
+import { Route as PublicProductsProductIdRouteImport } from './routes/_public/products/$productId'
 import { Route as AuthenticatedUserCartRouteImport } from './routes/_authenticated/_user/cart'
 import { Route as AuthenticatedUserProfileIndexRouteImport } from './routes/_authenticated/_user/profile/index'
 import { Route as AuthenticatedAdminAdminIndexRouteImport } from './routes/_authenticated/_admin/admin/index'
 import { Route as AuthenticatedAdminAdminProductsRouteImport } from './routes/_authenticated/_admin/admin/products'
 
-const ProductsRoute = ProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -46,6 +41,11 @@ const AuthenticatedUserRoute = AuthenticatedUserRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const PublicProductsProductIdRoute = PublicProductsProductIdRouteImport.update({
+  id: '/_public/products/$productId',
+  path: '/products/$productId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedUserCartRoute = AuthenticatedUserCartRouteImport.update({
   id: '/cart',
@@ -74,8 +74,8 @@ const AuthenticatedAdminAdminProductsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$authView': typeof AuthViewRoute
-  '/products': typeof ProductsRoute
   '/cart': typeof AuthenticatedUserCartRoute
+  '/products/$productId': typeof PublicProductsProductIdRoute
   '/admin/products': typeof AuthenticatedAdminAdminProductsRoute
   '/admin': typeof AuthenticatedAdminAdminIndexRoute
   '/profile': typeof AuthenticatedUserProfileIndexRoute
@@ -83,8 +83,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$authView': typeof AuthViewRoute
-  '/products': typeof ProductsRoute
   '/cart': typeof AuthenticatedUserCartRoute
+  '/products/$productId': typeof PublicProductsProductIdRoute
   '/admin/products': typeof AuthenticatedAdminAdminProductsRoute
   '/admin': typeof AuthenticatedAdminAdminIndexRoute
   '/profile': typeof AuthenticatedUserProfileIndexRoute
@@ -94,10 +94,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$authView': typeof AuthViewRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/products': typeof ProductsRoute
   '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/_user': typeof AuthenticatedUserRouteWithChildren
   '/_authenticated/_user/cart': typeof AuthenticatedUserCartRoute
+  '/_public/products/$productId': typeof PublicProductsProductIdRoute
   '/_authenticated/_admin/admin/products': typeof AuthenticatedAdminAdminProductsRoute
   '/_authenticated/_admin/admin/': typeof AuthenticatedAdminAdminIndexRoute
   '/_authenticated/_user/profile/': typeof AuthenticatedUserProfileIndexRoute
@@ -107,8 +107,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$authView'
-    | '/products'
     | '/cart'
+    | '/products/$productId'
     | '/admin/products'
     | '/admin'
     | '/profile'
@@ -116,8 +116,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$authView'
-    | '/products'
     | '/cart'
+    | '/products/$productId'
     | '/admin/products'
     | '/admin'
     | '/profile'
@@ -126,10 +126,10 @@ export interface FileRouteTypes {
     | '/'
     | '/$authView'
     | '/_authenticated'
-    | '/products'
     | '/_authenticated/_admin'
     | '/_authenticated/_user'
     | '/_authenticated/_user/cart'
+    | '/_public/products/$productId'
     | '/_authenticated/_admin/admin/products'
     | '/_authenticated/_admin/admin/'
     | '/_authenticated/_user/profile/'
@@ -139,18 +139,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthViewRoute: typeof AuthViewRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  ProductsRoute: typeof ProductsRoute
+  PublicProductsProductIdRoute: typeof PublicProductsProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/products': {
-      id: '/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof ProductsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -185,6 +178,13 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_public/products/$productId': {
+      id: '/_public/products/$productId'
+      path: '/products/$productId'
+      fullPath: '/products/$productId'
+      preLoaderRoute: typeof PublicProductsProductIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_user/cart': {
       id: '/_authenticated/_user/cart'
@@ -261,7 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthViewRoute: AuthViewRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  ProductsRoute: ProductsRoute,
+  PublicProductsProductIdRoute: PublicProductsProductIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
