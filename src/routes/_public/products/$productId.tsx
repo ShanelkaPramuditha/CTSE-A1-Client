@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
+import { useAddCartItem } from '@/queries/cart.queries';
+import { toast } from 'sonner';
 
 // Validation for product ID
 const productIdSchema = z.object({
@@ -29,6 +31,7 @@ export const Route = createFileRoute('/_public/products/$productId')({
 function ProductDetailPage() {
   const { productId } = Route.useParams();
   const [quantity, setQuantity] = useState(1);
+  const addToCart = useAddCartItem();
 
   // In a real app, you would fetch data here using a query hook
   // const { data: product, isLoading } = useProduct(productId);
@@ -153,8 +156,28 @@ function ProductDetailPage() {
               <Button
                 size='lg'
                 className='flex-1 h-14 text-lg rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/30'
+                disabled={addToCart.isPending}
+                onClick={() => {
+                  addToCart.mutate(
+                    {
+                      productId: product.id,
+                      productName: product.name,
+                      price: product.price,
+                      quantity,
+                    },
+                    {
+                      onSuccess: () => {
+                        toast.success(`Added ${product.name} to cart`);
+                        setQuantity(1);
+                      },
+                      onError: (error) => {
+                        toast.error(error.message || 'Failed to add to cart. Please log in first.');
+                      },
+                    },
+                  );
+                }}
               >
-                Add to Cart
+                {addToCart.isPending ? 'Adding...' : 'Add to Cart'}
               </Button>
               <Button size='lg' variant='outline' className='h-14 rounded-2xl'>
                 Wishlist
