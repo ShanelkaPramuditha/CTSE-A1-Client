@@ -1,0 +1,5 @@
+/* Layout sizing variables */
+:root {
+  /* Header Height */
+  --h-header: 64px;
+}

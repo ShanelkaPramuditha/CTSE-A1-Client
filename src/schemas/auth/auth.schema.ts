@@ -1,0 +1,37 @@
+import { UserRole } from '@/types/auth';
+import { z } from 'zod';
+
+export const signInSchema = z.object({
+  email: z.email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+  rememberMe: z.boolean().optional(),
+});
+
+export type SignInSchema = z.infer<typeof signInSchema>;
+
+export const signUpSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required'),
+  email: z.email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export type SignUpSchema = z.infer<typeof signUpSchema>;
+
+export const userResponseSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  email: z.email(),
+  avatar: z.string().optional(),
+  role: z.enum([UserRole.ADMIN, UserRole.USER]),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export type UserResponse = z.infer<typeof userResponseSchema>;
+
+export const authResponseSchema = z.object({
+  accessToken: z.string(),
+  user: userResponseSchema,
+});
+
+export type AuthResponseSchema = z.infer<typeof authResponseSchema>;
