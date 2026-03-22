@@ -35,7 +35,7 @@ jobs:
 
       - name: Create .env file from DEV_ENV secret
         run: |
-          printf '%s' "${{ secrets['DEV_ENV'] }}" > .env
+          printf '%s' "${{ secrets.DEV_ENV }}" > .env
 
       - name: Set lowercase image name
         id: image
