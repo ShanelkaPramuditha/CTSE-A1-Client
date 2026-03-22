@@ -1,6 +1,8 @@
 name: Client Docker Publish
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       image_tag:
