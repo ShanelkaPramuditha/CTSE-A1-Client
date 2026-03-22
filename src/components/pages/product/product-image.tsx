@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { normalizeProductImageUrl } from '@/lib/image-url';
@@ -21,17 +21,15 @@ export function ProductImage({
   iconClassName,
   loading = 'lazy',
 }: ProductImageProps) {
-  const [failed, setFailed] = useState(false);
+  // Track which exact URL failed to render, so changing `src` resets the UI
+  // without calling setState from an effect.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const trimmed = src?.trim();
   const resolvedSrc = useMemo(
     () => (trimmed ? normalizeProductImageUrl(trimmed) : undefined),
     [trimmed],
   );
-  const showImg = Boolean(resolvedSrc && !failed);
-
-  useEffect(() => {
-    setFailed(false);
-  }, [src]);
+  const showImg = Boolean(resolvedSrc && failedSrc !== resolvedSrc);
 
   if (showImg) {
     return (
@@ -40,7 +38,10 @@ export function ProductImage({
         alt={alt}
         loading={loading}
         className={cn('h-full w-full object-cover', className)}
-        onError={() => setFailed(true)}
+        onError={() => {
+          if (!resolvedSrc) return;
+          setFailedSrc(resolvedSrc);
+        }}
       />
     );
   }
