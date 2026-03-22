@@ -14,7 +14,7 @@ if (rootEl) {
 
   root.render(
     <React.StrictMode>
-      <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+      <ThemeProvider attribute='class' defaultTheme='light' forcedTheme='light' enableSystem>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <App />
