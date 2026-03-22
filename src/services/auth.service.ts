@@ -30,4 +30,8 @@ export const authService = {
     const response = await apiClient.patch('/users/profile', data);
     return toUser(response);
   },
+
+  changePassword: async (data: Record<string, string>): Promise<void> => {
+    await apiClient.patch('/users/change-password', data);
+  },
 };

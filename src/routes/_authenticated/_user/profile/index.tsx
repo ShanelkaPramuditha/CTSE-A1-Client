@@ -1,32 +1,61 @@
 'use client';
 
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useAuth } from '@/hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BadgeCheckIcon } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  BadgeCheckIcon,
+  UserIcon,
+  ShieldCheckIcon,
+  CameraIcon,
+  Loader2Icon,
+  Settings2Icon,
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  updateProfileSchema,
+  changePasswordSchema,
+  type UpdateProfileSchema,
+  type ChangePasswordSchema,
+} from '@/schemas/auth/auth.schema';
+import { toast } from 'sonner';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import type { User } from '@/types/auth';
 
 export const Route = createFileRoute('/_authenticated/_user/profile/')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { user } = useAuth();
+  const { user, updateProfile, changePassword } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
 
   if (!user) {
     return (
       <div className='flex flex-col items-center justify-center py-16'>
-        <p className='text-sm text-muted-foreground'>No user data available.</p>
+        <Loader2Icon className='h-8 w-8 animate-spin text-primary' />
+        <p className='mt-4 text-sm text-muted-foreground'>Loading user data...</p>
       </div>
     );
   }
 
-  const name = user.name ?? '';
-  const email = user.email ?? '';
-  const avatar = user.avatar;
-
   const initials =
-    (name || email || 'U')
+    (user.name || user.email || 'U')
       .split(' ')
       .filter(Boolean)
       .map((n) => n[0])
@@ -34,25 +63,333 @@ function RouteComponent() {
       .toUpperCase() || 'U';
 
   return (
-    <div className='mx-auto w-full lg:px-0'>
-      <Card className='mt-20 opacity-80 w-full  backdrop-blur-sm '>
-        <CardHeader className='flex flex-col items-center gap-4'>
-          <Avatar className='h-40 w-40 rounded-full border-4'>
-            <AvatarImage src={avatar} alt={name || email} />
-            <AvatarFallback className='text-lg font-semibold'>{initials}</AvatarFallback>
-          </Avatar>
-          <div className='space-y-1 text-center'>
-            <CardTitle className='flex items-center justify-center gap-1.5 text-xl'>
-              {name || 'Unnamed user'}
-              <BadgeCheckIcon className='h-5 w-5 text-blue-500' />
-            </CardTitle>
-            <CardDescription>{email}</CardDescription>
-            <div className='mt-2 px-3 py-1 bg-primary/10 rounded-full inline-block text-xs font-bold uppercase text-primary'>
-              {user.role}
+    <div className='container mx-auto max-w-5xl py-10 px-4 md:px-0'>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className='relative mb-8'>
+          <div className='h-32 w-full rounded-xl bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 backdrop-blur-md border border-primary/10' />
+
+          <div className='flex flex-col md:flex-row items-center md:items-end gap-6 px-8 -mt-12'>
+            <div className='relative group'>
+              <Avatar className='h-32 w-32 rounded-2xl border-4 border-background shadow-xl'>
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback className='text-3xl font-bold bg-primary/10 text-primary'>
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <button className='absolute bottom-2 right-2 p-2 bg-primary text-primary-foreground rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity'>
+                <CameraIcon className='h-4 w-4' />
+              </button>
+            </div>
+
+            <div className='flex-1 pb-2 text-center md:text-left'>
+              <div className='flex items-center justify-center md:justify-start gap-2'>
+                <h1 className='text-3xl font-bold tracking-tight'>{user.name || 'Unnamed user'}</h1>
+                <BadgeCheckIcon className='h-6 w-6 text-primary fill-primary/10' />
+              </div>
+              <p className='text-muted-foreground font-medium'>{user.email}</p>
+              <div className='mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shadow-sm'>
+                {user.role}
+              </div>
             </div>
           </div>
-        </CardHeader>
-      </Card>
+        </div>
+
+        <Tabs defaultValue='overview' className='w-full' onValueChange={setActiveTab}>
+          <div className='flex flex-col md:flex-row gap-8'>
+            <div className='w-full md:w-64'>
+              <TabsList className='flex md:flex-col h-auto w-full bg-transparent gap-2 p-0 justify-start'>
+                <TabsTrigger
+                  value='overview'
+                  className='flex items-center justify-start gap-3 px-4 py-3 w-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-xl transition-all'
+                >
+                  <UserIcon className='h-4 w-4' />
+                  <span className='font-semibold'>Account Overview</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value='edit'
+                  className='flex items-center justify-start gap-3 px-4 py-3 w-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-xl transition-all'
+                >
+                  <Settings2Icon className='h-4 w-4' />
+                  <span className='font-semibold'>Edit Profile</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value='security'
+                  className='flex items-center justify-start gap-3 px-4 py-3 w-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-xl transition-all'
+                >
+                  <ShieldCheckIcon className='h-4 w-4' />
+                  <span className='font-semibold'>Security</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <div className='flex-1'>
+              <AnimatePresence mode='wait'>
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TabsContent value='overview' className='mt-0'>
+                    <Card className='border-none shadow-lg bg-card/50 backdrop-blur-sm'>
+                      <CardHeader>
+                        <CardTitle>Overview</CardTitle>
+                        <CardDescription>View your account status and details.</CardDescription>
+                      </CardHeader>
+                      <CardContent className='space-y-6'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div className='p-4 rounded-xl border bg-background/50 space-y-1'>
+                            <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                              Full Name
+                            </p>
+                            <p className='font-semibold'>{user.name}</p>
+                          </div>
+                          <div className='p-4 rounded-xl border bg-background/50 space-y-1'>
+                            <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                              Email Address
+                            </p>
+                            <p className='font-semibold'>{user.email}</p>
+                          </div>
+                          <div className='p-4 rounded-xl border bg-background/50 space-y-1'>
+                            <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                              Role
+                            </p>
+                            <p className='font-semibold capitalize'>{user.role}</p>
+                          </div>
+                          <div className='p-4 rounded-xl border bg-background/50 space-y-1'>
+                            <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                              Organization Status
+                            </p>
+                            <p className='font-semibold flex items-center gap-1.5'>
+                              Verified Account
+                              <BadgeCheckIcon className='h-4 w-4 text-primary' />
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value='edit' className='mt-0'>
+                    <EditProfileForm user={user} updateProfile={updateProfile} />
+                  </TabsContent>
+
+                  <TabsContent value='security' className='mt-0'>
+                    <ChangePasswordForm changePassword={changePassword} />
+                  </TabsContent>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </Tabs>
+      </motion.div>
     </div>
+  );
+}
+
+interface EditProfileFormProps {
+  user: User;
+  updateProfile: (data: Partial<User>) => Promise<User>;
+}
+
+function EditProfileForm({ user, updateProfile }: EditProfileFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<UpdateProfileSchema>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || '',
+    },
+  });
+
+  async function onSubmit(data: UpdateProfileSchema) {
+    setIsSubmitting(true);
+    try {
+      await updateProfile(data);
+      toast.success('Profile updated successfully');
+    } catch {
+      toast.error('Failed to update profile');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Card className='border-none shadow-lg bg-card/50 backdrop-blur-sm'>
+      <CardHeader>
+        <CardTitle>Edit Profile</CardTitle>
+        <CardDescription>Update your personal information and profile picture.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter your name' {...field} className='bg-background/50' />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='email'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter your email' {...field} className='bg-background/50' />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='avatar'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Avatar URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='https://example.com/avatar.jpg'
+                      {...field}
+                      className='bg-background/50'
+                    />
+                  </FormControl>
+                  <FormDescription>Link to your profile picture.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type='submit' className='w-full md:w-auto mt-2' disabled={isSubmitting}>
+              {isSubmitting && <Loader2Icon className='mr-2 h-4 w-4 animate-spin' />}
+              Save Changes
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface ChangePasswordFormProps {
+  changePassword: (data: Record<string, string>) => Promise<void>;
+}
+
+function ChangePasswordForm({ changePassword }: ChangePasswordFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<ChangePasswordSchema>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
+
+  async function onSubmit(data: ChangePasswordSchema) {
+    setIsSubmitting(true);
+    try {
+      await changePassword({
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
+      });
+      toast.success('Password changed successfully');
+      form.reset();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Card className='border-none shadow-lg bg-card/50 backdrop-blur-sm'>
+      <CardHeader>
+        <CardTitle>Change Password</CardTitle>
+        <CardDescription>
+          Ensure your account is using a long, random password to stay secure.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+            <FormField
+              control={form.control}
+              name='oldPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Current Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='password'
+                      placeholder='••••••••'
+                      {...field}
+                      className='bg-background/50'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='newPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='password'
+                      placeholder='••••••••'
+                      {...field}
+                      className='bg-background/50'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='confirmPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='password'
+                      placeholder='••••••••'
+                      {...field}
+                      className='bg-background/50'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type='submit' className='w-full md:w-auto mt-2' disabled={isSubmitting}>
+              {isSubmitting && <Loader2Icon className='mr-2 h-4 w-4 animate-spin' />}
+              Update Password
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }

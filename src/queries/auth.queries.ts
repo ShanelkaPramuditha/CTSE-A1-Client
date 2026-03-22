@@ -47,3 +47,9 @@ export const useUpdateProfile = () => {
     },
   });
 };
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: (data: Record<string, string>) => authService.changePassword(data),
+  });
+};
