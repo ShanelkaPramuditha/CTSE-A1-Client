@@ -1,22 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import {
-  ShoppingBag,
-  Star,
-  TrendingUp,
-  ArrowLeft,
-  ShieldCheck,
-  Truck,
-  RotateCcw,
-  Plus,
-  Minus,
-} from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Truck, RotateCcw, Plus, Minus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { useAddCartItem } from '@/queries/cart.queries';
 import { toast } from 'sonner';
+import { productService } from '@/services/product.service';
 
 // Validation for product ID
 const productIdSchema = z.object({
@@ -32,22 +24,36 @@ function ProductDetailPage() {
   const { productId } = Route.useParams();
   const [quantity, setQuantity] = useState(1);
   const addToCart = useAddCartItem();
+  const {
+    data: product,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: () => productService.getProductById(productId),
+  });
 
-  // In a real app, you would fetch data here using a query hook
-  // const { data: product, isLoading } = useProduct(productId);
+  if (isLoading) {
+    return (
+      <div className='max-w-7xl mx-auto px-6 py-10'>
+        <div className='flex items-center gap-2 text-muted-foreground'>
+          <Loader2 className='h-4 w-4 animate-spin' />
+          Loading product...
+        </div>
+      </div>
+    );
+  }
 
-  const product = {
-    id: productId,
-    name: 'Minimalist Premium Chair',
-    price: 299,
-    description:
-      'Experience ultimate comfort with our Minimalist Premium Chair. Designed for long hours of focus, it features ergonomic support, premium fabric, and a sleek modern aesthetic that fits any workspace.',
-    rating: 4.8,
-    reviews: 124,
-    stock: 15,
-    category: 'Furniture',
-    features: ['Ergonomic Design', 'Premium Breathable Fabric', 'Adjustable Height', '360° Swivel'],
-  };
+  if (isError || !product) {
+    return (
+      <div className='max-w-7xl mx-auto px-6 py-10'>
+        <div className='rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive'>
+          {(error as Error)?.message || 'Failed to load product'}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='max-w-7xl mx-auto px-6 py-10 space-y-10'>
@@ -64,7 +70,18 @@ function ProductDetailPage() {
         {/* Product Image Section */}
         <div className='space-y-4'>
           <div className='aspect-square rounded-3xl bg-accent/50 flex items-center justify-center border border-accent overflow-hidden'>
-            <ShoppingBag className='h-32 w-32 text-muted-foreground/20' />
+            {product.imageUrl ? (
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className='h-full w-full object-cover'
+                onError={(event) => {
+                  event.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <ShoppingBag className='h-32 w-32 text-muted-foreground/20' />
+            )}
           </div>
           <div className='grid grid-cols-4 gap-4'>
             {[1, 2, 3, 4].map((i) => (
@@ -89,39 +106,15 @@ function ProductDetailPage() {
                 variant='outline'
                 className='rounded-full text-green-600 border-green-200 bg-green-50'
               >
-                In Stock
+                {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
               </Badge>
             </div>
             <h1 className='text-4xl font-bold tracking-tight text-foreground'>{product.name}</h1>
-            <div className='flex items-center gap-4 text-sm'>
-              <div className='flex items-center gap-1 text-yellow-500'>
-                <Star className='h-4 w-4 fill-yellow-500' />
-                <span className='font-medium'>{product.rating}</span>
-              </div>
-              <span className='text-muted-foreground'>{product.reviews} customer reviews</span>
-              <Separator orientation='vertical' className='h-4' />
-              <div className='flex items-center gap-1 text-primary'>
-                <TrendingUp className='h-4 w-4' />
-                <span className='font-medium'>Bestseller</span>
-              </div>
-            </div>
           </div>
 
-          <p className='text-3xl font-bold'>${product.price}</p>
+          <p className='text-3xl font-bold'>LKR {product.price}</p>
 
           <p className='text-muted-foreground leading-relaxed'>{product.description}</p>
-
-          <Separator />
-
-          {/* Features */}
-          <div className='grid grid-cols-2 gap-4'>
-            {product.features.map((feature) => (
-              <div key={feature} className='flex items-center gap-2 text-sm'>
-                <ShieldCheck className='h-4 w-4 text-primary' />
-                <span>{feature}</span>
-              </div>
-            ))}
-          </div>
 
           <Separator />
 
@@ -142,7 +135,7 @@ function ProductDetailPage() {
                   variant='ghost'
                   size='icon'
                   className='rounded-full h-8 w-8'
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                  onClick={() => setQuantity(Math.min(Math.max(product.stock, 1), quantity + 1))}
                 >
                   <Plus className='h-3 w-3' />
                 </Button>
@@ -156,11 +149,11 @@ function ProductDetailPage() {
               <Button
                 size='lg'
                 className='flex-1 h-14 text-lg rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/30'
-                disabled={addToCart.isPending}
+                disabled={addToCart.isPending || product.stock <= 0}
                 onClick={() => {
                   addToCart.mutate(
                     {
-                      productId: product.id,
+                      productId: product._id,
                       productName: product.name,
                       price: product.price,
                       quantity,
@@ -177,7 +170,11 @@ function ProductDetailPage() {
                   );
                 }}
               >
-                {addToCart.isPending ? 'Adding...' : 'Add to Cart'}
+                {addToCart.isPending
+                  ? 'Adding...'
+                  : product.stock > 0
+                    ? 'Add to Cart'
+                    : 'Out of Stock'}
               </Button>
               <Button size='lg' variant='outline' className='h-14 rounded-2xl'>
                 Wishlist

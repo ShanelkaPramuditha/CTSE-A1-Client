@@ -3,11 +3,20 @@ import { authService } from '@/services/auth.service';
 import type { SignInSchema, SignUpSchema } from '@/schemas/auth/auth.schema';
 import type { DashboardRange, User, UserDashboardStats } from '@/types/auth';
 
+const hasAuthSession = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return !!window.localStorage.getItem('auth.session.startedAt');
+};
+
 export const useProfile = () => {
   return useQuery<User | null>({
     queryKey: ['profile'],
     queryFn: () => authService.getProfile(),
     retry: false,
+    enabled: hasAuthSession(),
   });
 };
 
@@ -17,6 +26,9 @@ export const useLogin = () => {
     mutationFn: (data: SignInSchema) => authService.login(data),
     onSuccess: (data) => {
       queryClient.setQueryData(['profile'], data.user);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('auth.session.startedAt', new Date().toISOString());
+      }
     },
   });
 };
@@ -34,6 +46,9 @@ export const useLogout = () => {
     onSuccess: () => {
       queryClient.setQueryData(['profile'], null);
       queryClient.clear(); // Clear all cached data on logout
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('auth.session.startedAt');
+      }
     },
   });
 };

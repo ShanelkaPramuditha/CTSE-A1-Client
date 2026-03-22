@@ -17,6 +17,7 @@ import {
   useRemoveCartItem,
   useClearCart,
 } from '@/queries/cart.queries';
+import { useCheckout } from '@/queries/order.queries';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute('/_authenticated/_user/cart')({
@@ -28,6 +29,7 @@ function UserCartPage() {
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
   const clearCart = useClearCart();
+  const checkout = useCheckout();
 
   const handleUpdateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -62,6 +64,17 @@ function UserCartPage() {
     });
   };
 
+  const handleCheckout = () => {
+    checkout.mutate(undefined, {
+      onSuccess: (order) => {
+        toast.success(`Order placed successfully (${order.status})`);
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to place order');
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className='flex h-[60vh] items-center justify-center'>
@@ -80,8 +93,7 @@ function UserCartPage() {
   }
 
   const items = cart?.items ?? [];
-  const shipping = items.length > 0 ? 20 : 0;
-  const total = (cart?.totalAmount ?? 0) + shipping;
+  const total = cart?.totalAmount ?? 0;
 
   return (
     <div className='p-6 space-y-8 max-w-5xl mx-auto'>
@@ -137,9 +149,11 @@ function UserCartPage() {
                   </div>
                   <div className='flex-1 min-w-0'>
                     <h3 className='font-semibold truncate'>{item.productName}</h3>
-                    <p className='text-sm text-muted-foreground'>${item.price.toFixed(2)} each</p>
+                    <p className='text-sm text-muted-foreground'>
+                      LKR {item.price.toFixed(2)} each
+                    </p>
                     <div className='mt-2 flex items-center gap-4'>
-                      <p className='font-bold'>${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className='font-bold'>LKR{(item.price * item.quantity).toFixed(2)}</p>
                       <div className='flex items-center border rounded-md px-1'>
                         <Button
                           variant='ghost'
@@ -182,27 +196,28 @@ function UserCartPage() {
             <Card className='border-none shadow-lg shadow-black/5 sticky top-24 bg-primary/5'>
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
-                <CardDescription>Final subtotal including shipping.</CardDescription>
+                <CardDescription>Final subtotal.</CardDescription>
               </CardHeader>
               <CardContent className='space-y-4'>
                 <div className='flex justify-between text-sm'>
                   <span className='text-muted-foreground'>Subtotal</span>
-                  <span className='font-medium'>${(cart?.totalAmount ?? 0).toFixed(2)}</span>
-                </div>
-                <div className='flex justify-between text-sm'>
-                  <span className='text-muted-foreground'>Estimated Shipping</span>
-                  <span className='font-medium'>${shipping.toFixed(2)}</span>
+                  <span className='font-medium'>LKR {(cart?.totalAmount ?? 0).toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className='flex justify-between text-lg font-bold'>
                   <span>Total</span>
-                  <span className='text-primary'>${total.toFixed(2)}</span>
+                  <span className='text-primary'>LKR {total.toFixed(2)}</span>
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className='w-full h-12 shadow-md shadow-primary/20' size='lg'>
+                <Button
+                  className='w-full h-12 shadow-md shadow-primary/20'
+                  size='lg'
+                  onClick={handleCheckout}
+                  disabled={checkout.isPending || items.length === 0}
+                >
                   <CreditCard className='h-5 w-5 mr-4' />
-                  Proceed to Payment
+                  {checkout.isPending ? 'Processing Order...' : 'Proceed to Payment'}
                 </Button>
               </CardFooter>
             </Card>
