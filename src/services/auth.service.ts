@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api';
 import type { SignInSchema, SignUpSchema } from '@/schemas/auth/auth.schema';
-import type { AuthResponse, User } from '@/types/auth';
+import type { AuthResponse, DashboardRange, User, UserDashboardStats } from '@/types/auth';
 import { toAuthResponse, toUser } from '@/mappers/auth.mapper';
 
 export const authService = {
@@ -33,5 +33,11 @@ export const authService = {
 
   changePassword: async (data: Record<string, string>): Promise<void> => {
     await apiClient.patch('/users/change-password', data);
+  },
+
+  getDashboardStats: async (range: DashboardRange = '30d'): Promise<UserDashboardStats> => {
+    return apiClient.get('/users/dashboard-stats', {
+      params: { range },
+    });
   },
 };
