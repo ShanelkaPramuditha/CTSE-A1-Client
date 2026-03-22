@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { useAuth } from '@/hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,9 @@ import {
   Loader2Icon,
   Settings2Icon,
   BarChart3Icon,
+  LogOutIcon,
+  Clock3Icon,
+  MonitorIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -57,9 +60,17 @@ export const Route = createFileRoute('/_authenticated/_user/profile/')({
 });
 
 function RouteComponent() {
-  const { user, updateProfile, changePassword } = useAuth();
+  const { user, updateProfile, changePassword, logout } = useAuth();
+  const router = useRouter();
   const [selectedRange, setSelectedRange] = useState<DashboardRange>('30d');
   const { data: dashboardStats, isLoading: isDashboardLoading } = useDashboardStats(selectedRange);
+  const [sessionStartedAt] = useState<string | null>(() => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    return window.localStorage.getItem('auth.session.startedAt');
+  });
   const getTabFromUrl = (): ProfileTab => {
     if (typeof window === 'undefined') {
       return 'overview';
@@ -97,6 +108,16 @@ function RouteComponent() {
     }
 
     window.history.replaceState(window.history.state, '', url);
+  };
+
+  const handleLogoutSession = async () => {
+    try {
+      await logout();
+      toast.success('Session ended successfully');
+      router.navigate({ to: '/$authView', params: { authView: 'sign-in' } });
+    } catch {
+      toast.error('Failed to end session');
+    }
   };
 
   if (!user) {
@@ -243,7 +264,13 @@ function RouteComponent() {
                   </TabsContent>
 
                   <TabsContent value='security' className='mt-0'>
-                    <ChangePasswordForm changePassword={changePassword} />
+                    <div className='space-y-6'>
+                      <SessionManagementCard
+                        sessionStartedAt={sessionStartedAt}
+                        onLogout={handleLogoutSession}
+                      />
+                      <ChangePasswordForm changePassword={changePassword} />
+                    </div>
                   </TabsContent>
 
                   <TabsContent value='stats' className='mt-0'>
@@ -676,6 +703,84 @@ function ChangePasswordForm({ changePassword }: ChangePasswordFormProps) {
             </Button>
           </form>
         </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface SessionManagementCardProps {
+  sessionStartedAt: string | null;
+  onLogout: () => Promise<void>;
+}
+
+function SessionManagementCard({ sessionStartedAt, onLogout }: SessionManagementCardProps) {
+  const [isEndingSession, setIsEndingSession] = useState(false);
+
+  const startedLabel = sessionStartedAt
+    ? new Date(sessionStartedAt).toLocaleString()
+    : 'This device session started when you last signed in.';
+
+  async function handleLogout() {
+    setIsEndingSession(true);
+    try {
+      await onLogout();
+    } finally {
+      setIsEndingSession(false);
+    }
+  }
+
+  return (
+    <Card className='border-none shadow-lg bg-card/50 backdrop-blur-sm'>
+      <CardHeader>
+        <CardTitle>Session Management</CardTitle>
+        <CardDescription>Review the current device session and end it when needed.</CardDescription>
+      </CardHeader>
+      <CardContent className='space-y-4'>
+        <div className='grid gap-3 md:grid-cols-3'>
+          <div className='rounded-xl border bg-background/50 p-4 space-y-1'>
+            <div className='flex items-center gap-2 text-sm font-medium'>
+              <MonitorIcon className='h-4 w-4 text-primary' />
+              Current Device
+            </div>
+            <p className='text-sm text-muted-foreground'>Active session on this browser.</p>
+          </div>
+          <div className='rounded-xl border bg-background/50 p-4 space-y-1'>
+            <div className='flex items-center gap-2 text-sm font-medium'>
+              <Clock3Icon className='h-4 w-4 text-primary' />
+              Session Started
+            </div>
+            <p className='text-sm text-muted-foreground'>{startedLabel}</p>
+          </div>
+          <div className='rounded-xl border bg-background/50 p-4 space-y-1'>
+            <div className='flex items-center gap-2 text-sm font-medium'>
+              <ShieldCheckIcon className='h-4 w-4 text-primary' />
+              Session Status
+            </div>
+            <p className='text-sm text-muted-foreground'>Authenticated and auto-refreshed.</p>
+          </div>
+        </div>
+
+        <div className='flex flex-col gap-3 rounded-xl border bg-background/50 p-4 md:flex-row md:items-center md:justify-between'>
+          <div>
+            <p className='font-medium'>End this session</p>
+            <p className='text-sm text-muted-foreground'>
+              This clears the cookies and revokes the stored refresh token on the server.
+            </p>
+          </div>
+          <Button
+            type='button'
+            variant='destructive'
+            onClick={handleLogout}
+            disabled={isEndingSession}
+          >
+            {isEndingSession ? (
+              <Loader2Icon className='mr-2 h-4 w-4 animate-spin' />
+            ) : (
+              <LogOutIcon className='mr-2 h-4 w-4' />
+            )}
+            Log out device
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

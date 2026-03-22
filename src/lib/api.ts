@@ -9,9 +9,42 @@ export const apiClient = axios.create({
   },
 });
 
+const refreshClient = axios.create({
+  baseURL: SYSTEM_INFO.apiBaseUrl,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 apiClient.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    const retryableRequest = originalRequest as typeof originalRequest & {
+      _retry?: boolean;
+    };
+
+    const shouldAttemptRefresh =
+      error.response?.status === 401 &&
+      originalRequest &&
+      !retryableRequest._retry &&
+      !String(originalRequest.url || '').includes('/auth/login') &&
+      !String(originalRequest.url || '').includes('/auth/register') &&
+      !String(originalRequest.url || '').includes('/auth/refresh') &&
+      !String(originalRequest.url || '').includes('/auth/logout');
+
+    if (shouldAttemptRefresh) {
+      retryableRequest._retry = true;
+
+      try {
+        await refreshClient.post('/auth/refresh');
+        return apiClient.request(retryableRequest);
+      } catch {
+        // Fall through to the normalized error below when refresh fails.
+      }
+    }
+
     const message = error.response?.data?.message || error.message || 'An error occurred';
     const apiError = new Error(message);
 

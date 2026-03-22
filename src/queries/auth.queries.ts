@@ -17,6 +17,9 @@ export const useLogin = () => {
     mutationFn: (data: SignInSchema) => authService.login(data),
     onSuccess: (data) => {
       queryClient.setQueryData(['profile'], data.user);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('auth.session.startedAt', new Date().toISOString());
+      }
     },
   });
 };
@@ -34,6 +37,9 @@ export const useLogout = () => {
     onSuccess: () => {
       queryClient.setQueryData(['profile'], null);
       queryClient.clear(); // Clear all cached data on logout
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('auth.session.startedAt');
+      }
     },
   });
 };

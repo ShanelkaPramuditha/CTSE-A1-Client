@@ -139,7 +139,7 @@ function UserCartPage() {
                     <h3 className='font-semibold truncate'>{item.productName}</h3>
                     <p className='text-sm text-muted-foreground'>${item.price.toFixed(2)} each</p>
                     <div className='mt-2 flex items-center gap-4'>
-                      <p className='font-bold'>${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className='font-bold'>LKR{(item.price * item.quantity).toFixed(2)}</p>
                       <div className='flex items-center border rounded-md px-1'>
                         <Button
                           variant='ghost'
