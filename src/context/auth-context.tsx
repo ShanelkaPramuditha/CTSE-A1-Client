@@ -7,6 +7,7 @@ import {
   useRegister,
   useLogout,
   useUpdateProfile,
+  useChangePassword,
 } from '@/queries/auth.queries';
 
 export type AuthContextValue = {
@@ -17,6 +18,7 @@ export type AuthContextValue = {
   register: (data: SignUpSchema) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<User>;
+  changePassword: (data: Record<string, string>) => Promise<void>;
   refetch: () => void;
 };
 
@@ -28,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUpMutation = useRegister();
   const signOutMutation = useLogout();
   const updateProfileMutation = useUpdateProfile();
+  const changePasswordMutation = useChangePassword();
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -38,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register: (data) => signUpMutation.mutateAsync(data),
       logout: () => signOutMutation.mutateAsync(),
       updateProfile: (data) => updateProfileMutation.mutateAsync(data),
+      changePassword: (data) => changePasswordMutation.mutateAsync(data),
       refetch,
     }),
     [
@@ -47,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUpMutation,
       signOutMutation,
       updateProfileMutation,
+      changePasswordMutation,
       refetch,
     ],
   );

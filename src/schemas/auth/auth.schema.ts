@@ -35,3 +35,24 @@ export const authResponseSchema = z.object({
 });
 
 export type AuthResponseSchema = z.infer<typeof authResponseSchema>;
+
+export const changePasswordSchema = z
+  .object({
+    oldPassword: z.string().min(1, 'Old password is required'),
+    newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
+
+export const updateProfileSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  avatar: z.string().url('Invalid avatar URL').optional().or(z.literal('')),
+});
+
+export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;
