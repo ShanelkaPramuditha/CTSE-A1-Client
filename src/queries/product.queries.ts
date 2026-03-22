@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productService } from '@/services/product.service';
 import type { PagedProductsResponse } from '@/types/product';
 
@@ -20,6 +20,29 @@ export const useInfiniteProducts = (category?: string) => {
       }
 
       return lastPage.offset + lastPage.limit;
+    },
+  });
+};
+
+export const useCreateProduct = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Parameters<typeof productService.createProduct>[0]) =>
+      productService.createProduct(data),
+    onSuccess: () => {
+      qc.invalidateQueries(['admin-products']);
+      qc.invalidateQueries(['products']);
+    },
+  });
+};
+
+export const useDeleteProduct = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: string) => productService.deleteProduct(productId),
+    onSuccess: () => {
+      qc.invalidateQueries(['admin-products']);
+      qc.invalidateQueries(['products']);
     },
   });
 };

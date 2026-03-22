@@ -4,6 +4,9 @@ import { tanstackRouter } from '@tanstack/router-plugin/rspack';
 import { SYSTEM_INFO } from './src/constants';
 
 export default defineConfig({
+  server: {
+    port: 3001,
+  },
   html: {
     title: SYSTEM_INFO.name,
   },

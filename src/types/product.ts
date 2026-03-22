@@ -13,6 +13,15 @@ export interface Product {
   updatedAt?: string;
 }
 
+export interface ValidateStockResponse {
+  valid: boolean;
+  productId: string;
+  productName?: string;
+  availableStock?: number;
+  requestedQuantity: number;
+  price?: number;
+}
+
 export interface PagedProductsResponse {
   data: Product[];
   total: number;

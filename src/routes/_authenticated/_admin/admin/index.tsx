@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Package, ShoppingCart, Users, CreditCard, LayoutDashboard, Plus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { productService } from '@/services/product.service';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -35,13 +37,8 @@ function AdminDashboard() {
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-        <StatCard
-          icon={<Package className='h-5 w-5' />}
-          title='Inventory Items'
-          value='1,245'
-          change='+12% this week'
-          color='blue'
-        />
+        {/* fetch basic product stats for dashboard */}
+        <ProductStatsCard />
         <StatCard
           icon={<ShoppingCart className='h-5 w-5' />}
           title='Total Orders'
@@ -146,6 +143,35 @@ function StatCard({ icon, title, value, change, color }: StatCardProps) {
       <CardContent>
         <div className='text-3xl font-bold'>{value}</div>
         <p className='text-xs text-muted-foreground pt-1'>{change}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProductStatsCard() {
+  const { data } = useQuery({
+    queryKey: ['admin-products', 'dashboard-stats'],
+    queryFn: () => productService.getProducts({ limit: 1000, offset: 0 }),
+    staleTime: 1000 * 60,
+  });
+
+  const total = data?.total ?? 0;
+  const products = data?.data ?? [];
+  const lowStock = products.filter((p) => (p.availableStock ?? p.stock) <= 10).length;
+
+  return (
+    <Card className='border-none shadow-sm shadow-black/5'>
+      <CardHeader className='flex flex-row items-center justify-between pb-2 space-y-0'>
+        <CardTitle className='text-sm font-medium'>Inventory Items</CardTitle>
+        <div className={`p-2 rounded-lg text-blue-500 bg-blue-500/10`}>
+          <Package className='h-5 w-5' />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className='text-3xl font-bold'>{total.toLocaleString()}</div>
+        <p className='text-xs text-muted-foreground pt-1'>
+          {lowStock} items low in stock • {data?.categories?.length ?? 0} categories
+        </p>
       </CardContent>
     </Card>
   );

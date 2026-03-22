@@ -22,7 +22,9 @@ function ProductCard({ product }: { product: Product }) {
   const addToCart = useAddCartItem();
   const [imageUnavailable, setImageUnavailable] = useState(!product.imageUrl);
   const imageUrl = product.imageUrl ?? '';
-  const isInStock = (product.availableStock ?? product.stock) > 0;
+  const availableStock = product.availableStock ?? product.stock;
+  const orderedQuantity = product.orderedQuantity ?? 0;
+  const isInStock = availableStock > 0;
 
   const handleAddToCart = () => {
     addToCart.mutate(
@@ -85,6 +87,15 @@ function ProductCard({ product }: { product: Product }) {
         <CardDescription className='line-clamp-2 min-h-10 text-sm leading-5'>
           {product.description}
         </CardDescription>
+
+        <div className='flex flex-wrap gap-2 text-xs text-muted-foreground'>
+          <Badge variant='secondary' className='rounded-full px-2 py-0.5'>
+            {orderedQuantity} ordered
+          </Badge>
+          <Badge variant='outline' className='rounded-full px-2 py-0.5'>
+            {availableStock} in stock
+          </Badge>
+        </div>
 
         <Button
           type='button'

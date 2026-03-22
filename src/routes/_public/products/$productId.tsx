@@ -34,6 +34,9 @@ function ProductDetailPage() {
     queryFn: () => productService.getProductById(productId),
   });
 
+  const availableStock = product?.availableStock ?? product?.stock ?? 0;
+  const orderedQuantity = product?.orderedQuantity ?? 0;
+
   if (isLoading) {
     return (
       <div className='max-w-7xl mx-auto px-6 py-10'>
@@ -106,7 +109,7 @@ function ProductDetailPage() {
                 variant='outline'
                 className='rounded-full text-green-600 border-green-200 bg-green-50'
               >
-                {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                {availableStock > 0 ? 'In Stock' : 'Out of Stock'}
               </Badge>
             </div>
             <h1 className='text-4xl font-bold tracking-tight text-foreground'>{product.name}</h1>
@@ -115,6 +118,17 @@ function ProductDetailPage() {
           <p className='text-3xl font-bold'>LKR {product.price}</p>
 
           <p className='text-muted-foreground leading-relaxed'>{product.description}</p>
+
+          <div className='grid grid-cols-2 gap-4 rounded-2xl border bg-accent/20 p-4 text-sm'>
+            <div>
+              <p className='text-muted-foreground'>Available stock</p>
+              <p className='text-lg font-semibold'>{availableStock}</p>
+            </div>
+            <div>
+              <p className='text-muted-foreground'>Ordered quantity</p>
+              <p className='text-lg font-semibold'>{orderedQuantity}</p>
+            </div>
+          </div>
 
           <Separator />
 
@@ -135,13 +149,13 @@ function ProductDetailPage() {
                   variant='ghost'
                   size='icon'
                   className='rounded-full h-8 w-8'
-                  onClick={() => setQuantity(Math.min(Math.max(product.stock, 1), quantity + 1))}
+                  onClick={() => setQuantity(Math.min(Math.max(availableStock, 1), quantity + 1))}
                 >
                   <Plus className='h-3 w-3' />
                 </Button>
               </div>
               <p className='text-sm text-muted-foreground'>
-                Only {product.stock} units left in stock
+                Only {availableStock} units left in stock
               </p>
             </div>
 
@@ -149,7 +163,7 @@ function ProductDetailPage() {
               <Button
                 size='lg'
                 className='flex-1 h-14 text-lg rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/30'
-                disabled={addToCart.isPending || product.stock <= 0}
+                disabled={addToCart.isPending || availableStock <= 0}
                 onClick={() => {
                   addToCart.mutate(
                     {
@@ -172,7 +186,7 @@ function ProductDetailPage() {
               >
                 {addToCart.isPending
                   ? 'Adding...'
-                  : product.stock > 0
+                  : availableStock > 0
                     ? 'Add to Cart'
                     : 'Out of Stock'}
               </Button>

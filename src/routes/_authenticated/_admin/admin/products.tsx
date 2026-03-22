@@ -8,7 +8,6 @@ import {
   Plus,
   MoreHorizontal,
   Edit,
-  Trash2,
   Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -32,6 +31,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { productService } from '@/services/product.service';
 import type { Product, PagedProductsResponse } from '@/types/product';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { useCreateProduct } from '@/queries/product.queries';
 
 export const Route = createFileRoute('/_authenticated/_admin/admin/products')({
   component: AdminProductsManagement,
@@ -59,6 +62,9 @@ function getStockStatus(product: Product) {
 
 function AdminProductsManagement() {
   const [search, setSearch] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const createMutation = useCreateProduct();
 
   const {
     data: productsResponse,
@@ -99,10 +105,74 @@ function AdminProductsManagement() {
             <p className='text-muted-foreground'>Total control over your product catalog.</p>
           </div>
         </div>
-        <Button size='lg' className='shadow-lg'>
-          <Plus className='h-5 w-5 mr-2' />
-          Create Product
-        </Button>
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogTrigger asChild>
+            <Button size='lg' className='shadow-lg'>
+              <Plus className='h-5 w-5 mr-2' />
+              Create Product
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Product</DialogTitle>
+              <DialogDescription>Add a new product to the catalog.</DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget as HTMLFormElement;
+                const fd = new FormData(form);
+                const payload = {
+                  name: String(fd.get('name') ?? '').trim(),
+                  description: String(fd.get('description') ?? '').trim(),
+                  price: Number(fd.get('price') ?? 0),
+                  stock: Number(fd.get('stock') ?? 0),
+                  category: String(fd.get('category') ?? '').trim(),
+                  imageUrl: String(fd.get('imageUrl') ?? '').trim() || undefined,
+                };
+
+                createMutation.mutate(payload, {
+                  onSuccess: () => {
+                    setCreateOpen(false);
+                    form.reset();
+                    toast.success('Product created successfully');
+                  },
+                  onError: (error) => {
+                    toast.error(error instanceof Error ? error.message : 'Failed to create product');
+                  },
+                });
+              }}
+            >
+              <div className='grid gap-3'>
+                <div>
+                  <label className='text-sm font-medium'>Name</label>
+                  <Input name='name' required />
+                </div>
+                <div>
+                  <label className='text-sm font-medium'>Description</label>
+                  <Textarea name='description' required />
+                </div>
+                <div className='grid grid-cols-3 gap-2'>
+                  <Input name='price' type='number' step='0.01' placeholder='Price' required />
+                  <Input name='stock' type='number' placeholder='Stock' required />
+                  <Input name='category' placeholder='Category' required />
+                </div>
+                <div>
+                  <label className='text-sm font-medium'>Image URL</label>
+                  <Input name='imageUrl' placeholder='https://...' />
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type='button' variant='outline'>Cancel</Button>
+                  </DialogClose>
+                  <Button type='submit' disabled={createMutation.isLoading}>
+                    {createMutation.isLoading ? 'Creating...' : 'Create Product'}
+                  </Button>
+                </DialogFooter>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card className='border-none shadow-sm shadow-black/5'>
@@ -143,6 +213,7 @@ function AdminProductsManagement() {
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Stock</TableHead>
+                <TableHead>Ordered</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className='text-right'>Actions</TableHead>
               </TableRow>
@@ -151,6 +222,7 @@ function AdminProductsManagement() {
               {filteredProducts.map((item) => {
                 const status = getStockStatus(item);
                 const availableStock = item.availableStock ?? item.stock;
+                const orderedQuantity = item.orderedQuantity ?? 0;
 
                 return (
                   <TableRow key={item._id}>
@@ -161,6 +233,7 @@ function AdminProductsManagement() {
                     <TableCell className='text-muted-foreground'>{item.category}</TableCell>
                     <TableCell className='font-mono'>{lkrFormatter.format(item.price)}</TableCell>
                     <TableCell>{availableStock}</TableCell>
+                    <TableCell>{orderedQuantity}</TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -187,9 +260,6 @@ function AdminProductsManagement() {
                           <DropdownMenuItem>
                             <Edit className='h-4 w-4 mr-2' /> Edit Info
                           </DropdownMenuItem>
-                          <DropdownMenuItem className='text-red-600'>
-                            <Trash2 className='h-4 w-4 mr-2' /> Delete Record
-                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -199,7 +269,7 @@ function AdminProductsManagement() {
 
               {!isLoading && !isError && filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className='py-6 text-center text-sm text-muted-foreground'>
+                  <TableCell colSpan={7} className='py-6 text-center text-sm text-muted-foreground'>
                     No products found.
                   </TableCell>
                 </TableRow>
