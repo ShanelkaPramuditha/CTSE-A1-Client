@@ -1,8 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/auth.service';
 import type { SignInSchema, SignUpSchema } from '@/schemas/auth/auth.schema';
-import type { User } from '@/types/auth';
-import { ACCESS_TOKEN_STORAGE_KEY } from '@/constants/storage';
+import type { DashboardRange, User, UserDashboardStats } from '@/types/auth';
 
 export const useProfile = () => {
   return useQuery<User | null>({
@@ -53,5 +52,13 @@ export const useUpdateProfile = () => {
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: (data: Record<string, string>) => authService.changePassword(data),
+  });
+};
+
+export const useDashboardStats = (range: DashboardRange = '30d') => {
+  return useQuery<UserDashboardStats>({
+    queryKey: ['dashboard-stats', range],
+    queryFn: () => authService.getDashboardStats(range),
+    retry: 1,
   });
 };
