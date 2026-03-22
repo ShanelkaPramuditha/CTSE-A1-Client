@@ -50,7 +50,8 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 });
 
 function stockStatus(availableStock: number) {
-  if (availableStock === 0) return { label: 'Out of stock', className: 'bg-red-500/10 text-red-600' };
+  if (availableStock === 0)
+    return { label: 'Out of stock', className: 'bg-red-500/10 text-red-600' };
   if (availableStock < 10)
     return { label: 'Low stock', className: 'bg-orange-500/10 text-orange-600' };
   return { label: 'In stock', className: 'bg-green-500/10 text-green-600' };
