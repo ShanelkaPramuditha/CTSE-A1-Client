@@ -5,8 +5,6 @@ COPY package.json pnpm-lock.yaml ./
 RUN corepack enable && pnpm install --frozen-lockfile
 
 COPY . .
-ARG PUBLIC_BASE_URL
-ENV PUBLIC_BASE_URL=${PUBLIC_BASE_URL}
 RUN pnpm build
 
 FROM nginx:1.27-alpine AS runner

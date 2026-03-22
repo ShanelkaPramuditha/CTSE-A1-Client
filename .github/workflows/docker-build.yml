@@ -7,10 +7,6 @@ on:
         description: Docker image tag
         required: true
         default: latest
-      public_base_url:
-        description: Public backend API URL used at build time
-        required: true
-        default: http://localhost:3000
 
 env:
   REGISTRY: ghcr.io
@@ -38,6 +34,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create .env file from DEV_ENV secret
+        run: |
+          printf '%s' "${{ secrets['DEV_ENV'] }}" > .env
+
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
@@ -45,7 +45,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.image_tag }}
-          build-args: |
-            PUBLIC_BASE_URL=${{ inputs.public_base_url }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
