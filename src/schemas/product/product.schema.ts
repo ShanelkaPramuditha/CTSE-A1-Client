@@ -13,6 +13,9 @@ export const productDtoSchema = z.object({
     .nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  totalOrders: z.number().optional(),
+  orderedQuantity: z.number().optional(),
+  availableStock: z.number().optional(),
   __v: z.number().optional(),
 });
 

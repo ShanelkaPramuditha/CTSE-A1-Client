@@ -9,6 +9,9 @@ export interface Product {
   imageUrl?: string;
   createdAt: string;
   updatedAt: string;
+  totalOrders: number;
+  orderedQuantity: number;
+  availableStock: number;
 }
 
 export interface CreateProductPayload {

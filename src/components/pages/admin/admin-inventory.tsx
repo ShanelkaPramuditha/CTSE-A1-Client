@@ -49,9 +49,9 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
   currency: 'USD',
 });
 
-function stockStatus(stock: number) {
-  if (stock === 0) return { label: 'Out of stock', className: 'bg-red-500/10 text-red-600' };
-  if (stock < 10)
+function stockStatus(availableStock: number) {
+  if (availableStock === 0) return { label: 'Out of stock', className: 'bg-red-500/10 text-red-600' };
+  if (availableStock < 10)
     return { label: 'Low stock', className: 'bg-orange-500/10 text-orange-600' };
   return { label: 'In stock', className: 'bg-green-500/10 text-green-600' };
 }
@@ -130,7 +130,8 @@ export function AdminInventoryPage() {
                   <TableHead>Product</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
+                  <TableHead>Available</TableHead>
+                  <TableHead>Orders</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className='text-right'>Actions</TableHead>
                 </TableRow>
@@ -138,13 +139,13 @@ export function AdminInventoryPage() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className='text-center text-muted-foreground py-10'>
+                    <TableCell colSpan={7} className='text-center text-muted-foreground py-10'>
                       {search ? 'No matches.' : 'No products yet. Create one to get started.'}
                     </TableCell>
                   </TableRow>
                 ) : (
                   filtered.map((item) => {
-                    const status = stockStatus(item.stock);
+                    const status = stockStatus(item.availableStock);
                     return (
                       <TableRow key={item.id}>
                         <TableCell>
@@ -169,7 +170,10 @@ export function AdminInventoryPage() {
                         <TableCell className='font-mono tabular-nums'>
                           {priceFormatter.format(item.price)}
                         </TableCell>
-                        <TableCell>{item.stock}</TableCell>
+                        <TableCell className='tabular-nums'>{item.availableStock}</TableCell>
+                        <TableCell className='tabular-nums text-muted-foreground'>
+                          {item.totalOrders} · {item.orderedQuantity} sold
+                        </TableCell>
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${status.className}`}

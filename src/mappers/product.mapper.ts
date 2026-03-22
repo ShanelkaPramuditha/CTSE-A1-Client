@@ -24,6 +24,9 @@ export const toProduct = (data: unknown): Product => {
     imageUrl: normalizeImageUrl(parsed.imageUrl),
     createdAt: parsed.createdAt,
     updatedAt: parsed.updatedAt,
+    totalOrders: parsed.totalOrders ?? 0,
+    orderedQuantity: parsed.orderedQuantity ?? 0,
+    availableStock: parsed.availableStock ?? parsed.stock ?? 0,
   };
 };
 
@@ -39,6 +42,9 @@ export const toProductList = (data: unknown): Product[] => {
     imageUrl: normalizeImageUrl(p.imageUrl),
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
+    totalOrders: p.totalOrders ?? 0,
+    orderedQuantity: p.orderedQuantity ?? 0,
+    availableStock: p.availableStock ?? p.stock ?? 0,
   }));
 };
 

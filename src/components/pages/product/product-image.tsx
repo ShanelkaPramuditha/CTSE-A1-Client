@@ -14,7 +14,13 @@ type ProductImageProps = {
 /**
  * Renders product image when `src` is valid; on load error or missing URL shows a neutral placeholder.
  */
-export function ProductImage({ src, alt, className, iconClassName, loading = 'lazy' }: ProductImageProps) {
+export function ProductImage({
+  src,
+  alt,
+  className,
+  iconClassName,
+  loading = 'lazy',
+}: ProductImageProps) {
   const [failed, setFailed] = useState(false);
   const trimmed = src?.trim();
   const resolvedSrc = useMemo(

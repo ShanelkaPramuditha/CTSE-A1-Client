@@ -21,7 +21,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
-import { createProductSchema, type CreateProductFormValues } from '@/schemas/product/product.schema';
+import {
+  createProductSchema,
+  type CreateProductFormValues,
+} from '@/schemas/product/product.schema';
 import { useCreateProduct } from '@/queries/product.queries';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -153,11 +156,7 @@ export function CreateProductDialog() {
                 <FormItem>
                   <FormLabel>Image URL (optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      type='url'
-                      placeholder='https://example.com/image.jpg'
-                      {...field}
-                    />
+                    <Input type='url' placeholder='https://example.com/image.jpg' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

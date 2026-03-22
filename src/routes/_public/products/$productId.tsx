@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from 'zod';
 import {
-  ShoppingBag,
   ArrowLeft,
   Truck,
   RotateCcw,
@@ -9,6 +8,7 @@ import {
   Minus,
   AlertCircle,
   Package,
+  ShoppingCart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -73,7 +73,7 @@ function ProductDetailPage() {
     );
   }
 
-  const stockAvailable = product.stock > 0;
+  const stockAvailable = product.availableStock > 0;
 
   return (
     <div className='max-w-7xl mx-auto px-6 py-10 space-y-10'>
@@ -112,13 +112,21 @@ function ProductDetailPage() {
                     : 'text-destructive border-destructive/30 bg-destructive/5'
                 }`}
               >
-                {stockAvailable ? `${product.stock} in stock` : 'Out of stock'}
+                {stockAvailable ? `${product.availableStock} in stock` : 'Out of stock'}
               </Badge>
             </div>
             <h1 className='text-4xl font-bold tracking-tight text-foreground'>{product.name}</h1>
-            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-              <Package className='h-4 w-4' />
-              <span>SKU reference: {product.id}</span>
+            <div className='flex items-center gap-4 text-sm text-muted-foreground'>
+              <span className='inline-flex items-center gap-1'>
+                <Package className='h-4 w-4' />
+                SKU: {product.id}
+              </span>
+              {product.totalOrders > 0 && (
+                <span className='inline-flex items-center gap-1'>
+                  <ShoppingCart className='h-4 w-4' />
+                  {product.totalOrders} orders · {product.orderedQuantity} sold
+                </span>
+              )}
             </div>
           </div>
 
@@ -145,14 +153,16 @@ function ProductDetailPage() {
                   variant='ghost'
                   size='icon'
                   className='rounded-full h-8 w-8'
-                  disabled={!stockAvailable || quantity >= product.stock}
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                  disabled={!stockAvailable || quantity >= product.availableStock}
+                  onClick={() => setQuantity(Math.min(product.availableStock, quantity + 1))}
                 >
                   <Plus className='h-3 w-3' />
                 </Button>
               </div>
               <p className='text-sm text-muted-foreground'>
-                {stockAvailable ? `Up to ${product.stock} units available` : 'No units available'}
+                {stockAvailable
+                  ? `Up to ${product.availableStock} units available`
+                  : 'No units available'}
               </p>
             </div>
 

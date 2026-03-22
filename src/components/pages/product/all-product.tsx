@@ -47,7 +47,9 @@ export function AllProductsPage() {
           {products?.length ? (
             products.map((product) => <ProductCard key={product.id} product={product} />)
           ) : !isError ? (
-            <p className='text-muted-foreground col-span-full text-center py-12'>No products yet.</p>
+            <p className='text-muted-foreground col-span-full text-center py-12'>
+              No products yet.
+            </p>
           ) : null}
         </div>
       )}

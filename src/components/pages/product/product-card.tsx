@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Package } from 'lucide-react';
+import { Package, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const inStock = product.stock > 0;
+  const inStock = product.availableStock > 0;
 
   return (
     <Card className='group overflow-hidden border-none bg-accent/40 shadow-sm transition-all hover:shadow-lg hover:bg-accent/60 h-full flex flex-col'>
@@ -44,8 +44,14 @@ export function ProductCard({ product }: ProductCardProps) {
                 </Badge>
                 <span className='inline-flex items-center gap-1 text-xs'>
                   <Package className='h-3.5 w-3.5' />
-                  {product.stock} in stock
+                  {product.availableStock} in stock
                 </span>
+                {product.totalOrders > 0 && (
+                  <span className='inline-flex items-center gap-1 text-xs text-muted-foreground'>
+                    <TrendingUp className='h-3.5 w-3.5' />
+                    {product.totalOrders} orders
+                  </span>
+                )}
               </CardDescription>
             </div>
             <span className='shrink-0 font-semibold text-lg tabular-nums'>
@@ -55,7 +61,9 @@ export function ProductCard({ product }: ProductCardProps) {
         </CardHeader>
       </Link>
       <CardContent className='mt-auto pt-0 flex flex-col gap-3'>
-        <p className='text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]'>{product.description}</p>
+        <p className='text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]'>
+          {product.description}
+        </p>
         <div className='flex flex-col sm:flex-row gap-2'>
           {inStock ? (
             <>
