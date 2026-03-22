@@ -1,13 +1,23 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+import { SYSTEM_INFO } from '@/constants';
+import { ACCESS_TOKEN_STORAGE_KEY } from '@/constants/storage';
 
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: SYSTEM_INFO.apiBaseUrl,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) : null;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 apiClient.interceptors.response.use(

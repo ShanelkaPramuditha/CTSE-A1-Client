@@ -14,6 +14,7 @@ import { Route as AuthViewRouteImport } from './routes/$authView'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUserRouteImport } from './routes/_authenticated/_user'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
+import { Route as PublicProductsIndexRouteImport } from './routes/_public/products/index'
 import { Route as PublicProductsProductIdRouteImport } from './routes/_public/products/$productId'
 import { Route as AuthenticatedUserCartRouteImport } from './routes/_authenticated/_user/cart'
 import { Route as AuthenticatedUserProfileIndexRouteImport } from './routes/_authenticated/_user/profile/index'
@@ -41,6 +42,11 @@ const AuthenticatedUserRoute = AuthenticatedUserRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const PublicProductsIndexRoute = PublicProductsIndexRouteImport.update({
+  id: '/_public/products/',
+  path: '/products/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PublicProductsProductIdRoute = PublicProductsProductIdRouteImport.update({
   id: '/_public/products/$productId',
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/$authView': typeof AuthViewRoute
   '/cart': typeof AuthenticatedUserCartRoute
   '/products/$productId': typeof PublicProductsProductIdRoute
+  '/products': typeof PublicProductsIndexRoute
   '/admin/products': typeof AuthenticatedAdminAdminProductsRoute
   '/admin': typeof AuthenticatedAdminAdminIndexRoute
   '/profile': typeof AuthenticatedUserProfileIndexRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/$authView': typeof AuthViewRoute
   '/cart': typeof AuthenticatedUserCartRoute
   '/products/$productId': typeof PublicProductsProductIdRoute
+  '/products': typeof PublicProductsIndexRoute
   '/admin/products': typeof AuthenticatedAdminAdminProductsRoute
   '/admin': typeof AuthenticatedAdminAdminIndexRoute
   '/profile': typeof AuthenticatedUserProfileIndexRoute
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/_authenticated/_user': typeof AuthenticatedUserRouteWithChildren
   '/_authenticated/_user/cart': typeof AuthenticatedUserCartRoute
   '/_public/products/$productId': typeof PublicProductsProductIdRoute
+  '/_public/products/': typeof PublicProductsIndexRoute
   '/_authenticated/_admin/admin/products': typeof AuthenticatedAdminAdminProductsRoute
   '/_authenticated/_admin/admin/': typeof AuthenticatedAdminAdminIndexRoute
   '/_authenticated/_user/profile/': typeof AuthenticatedUserProfileIndexRoute
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/$authView'
     | '/cart'
     | '/products/$productId'
+    | '/products'
     | '/admin/products'
     | '/admin'
     | '/profile'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/$authView'
     | '/cart'
     | '/products/$productId'
+    | '/products'
     | '/admin/products'
     | '/admin'
     | '/profile'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_user'
     | '/_authenticated/_user/cart'
     | '/_public/products/$productId'
+    | '/_public/products/'
     | '/_authenticated/_admin/admin/products'
     | '/_authenticated/_admin/admin/'
     | '/_authenticated/_user/profile/'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   AuthViewRoute: typeof AuthViewRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   PublicProductsProductIdRoute: typeof PublicProductsProductIdRoute
+  PublicProductsIndexRoute: typeof PublicProductsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_public/products/': {
+      id: '/_public/products/'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof PublicProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_public/products/$productId': {
       id: '/_public/products/$productId'
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthViewRoute: AuthViewRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   PublicProductsProductIdRoute: PublicProductsProductIdRoute,
+  PublicProductsIndexRoute: PublicProductsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

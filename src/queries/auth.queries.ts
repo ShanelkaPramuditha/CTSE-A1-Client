@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/auth.service';
 import type { SignInSchema, SignUpSchema } from '@/schemas/auth/auth.schema';
 import type { User } from '@/types/auth';
+import { ACCESS_TOKEN_STORAGE_KEY } from '@/constants/storage';
 
 export const useProfile = () => {
   return useQuery<User | null>({
@@ -32,6 +33,7 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: () => {
+      localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
       queryClient.setQueryData(['profile'], null);
       queryClient.clear(); // Clear all cached data on logout
     },
