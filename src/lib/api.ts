@@ -1,7 +1,5 @@
-import axios from 'axios';
-
 import { SYSTEM_INFO } from '@/constants';
-import { ACCESS_TOKEN_STORAGE_KEY } from '@/constants/storage';
+import axios from 'axios';
 
 export const apiClient = axios.create({
   baseURL: SYSTEM_INFO.apiBaseUrl,

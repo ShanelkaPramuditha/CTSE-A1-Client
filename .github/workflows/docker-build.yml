@@ -1,6 +1,8 @@
 name: Client Docker Publish
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       image_tag:
@@ -10,7 +12,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/ctse-a1-client
 
 jobs:
   build-and-push:
@@ -36,7 +37,12 @@ jobs:
 
       - name: Create .env file from DEV_ENV secret
         run: |
-          printf '%s' "${{ secrets['DEV_ENV'] }}" > .env
+          printf '%s' "${{ secrets.DEV_ENV }}" > .env
+
+      - name: Set lowercase image name
+        id: image
+        run: |
+          echo "name=${{ env.REGISTRY }}/${GITHUB_REPOSITORY_OWNER,,}/ctse-a1-client" >> "$GITHUB_OUTPUT"
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -44,6 +50,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.image_tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.image.outputs.name }}:${{ inputs.image_tag }}
+          cache-from: type=gha,scope=ctse-a1-client
+          cache-to: type=gha,mode=max,scope=ctse-a1-client
