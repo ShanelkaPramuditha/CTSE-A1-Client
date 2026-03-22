@@ -102,7 +102,7 @@ function AdminDashboard() {
                     <Package className='h-4 w-4' />
                   </span>
                   <div>
-                    <p className='font-medium'>New Inventory: AirPods Max</p>
+                    <p className='font-medium'>New catalog update</p>
                     <p className='text-xs text-muted-foreground'>Stock arrived from Tokyo hub.</p>
                   </div>
                 </div>

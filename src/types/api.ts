@@ -1,7 +1,7 @@
 // Pagination and search parameters for API requests
 export interface PaginationParams {
   limit?: number;
-  offset?: number;
+  skip?: number;
 }
 
 export interface DateRangeParams {
@@ -15,16 +15,45 @@ export interface SearchParams {
 
 export interface DefaultQueryParams extends PaginationParams, SearchParams {}
 
+// Product data returned by the gateway
+export interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  totalOrders: number;
+  orderedQuantity: number;
+  availableStock: number;
+}
+
+// Product creation payload
+export interface CreateProductPayload {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  imageUrl?: string;
+}
+
 // PaginationApiResponse interface for consistent API responses
 export interface PaginationApiResponse<T> {
   data: T[];
   total: number;
+  totalPages: number;
+  page: number;
+  hasMore: boolean;
 }
 
 // Default values for consistency
 export const DEFAULT_PAGINATION = {
   limit: 10,
-  offset: 0,
+  skip: 0,
 } as const;
 
 export const DEFAULT_DATE_RANGE = {

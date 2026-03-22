@@ -8,6 +8,9 @@ export default defineConfig({
     title: SYSTEM_INFO.name,
   },
   plugins: [pluginReact()],
+  server: {
+    port: 3001, // Change this to your desired port number
+  },
   tools: {
     rspack: {
       plugins: [
