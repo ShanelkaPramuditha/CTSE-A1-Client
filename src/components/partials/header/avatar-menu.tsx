@@ -61,6 +61,9 @@ export function AvatarMenu() {
             <DropdownMenuItem onClick={() => navigate({ to: BASE_ROUTES.PROFILE })}>
               Profile
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate({ to: BASE_ROUTES.ORDERS })}>
+              Orders
+            </DropdownMenuItem>
           </>
         ) : (
           <>

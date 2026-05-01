@@ -31,8 +31,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             showNotification={showNotification}
           />
 
-          <main className='flex-1 overflow-auto p-4 min-h-[calc(100vh-var(--h-header))]'>
-            {children}
+          <main className='flex-1 overflow-auto min-h-[calc(100vh-var(--h-header))]'>
+            <div className='mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8'>{children}</div>
           </main>
         </div>
       </div>

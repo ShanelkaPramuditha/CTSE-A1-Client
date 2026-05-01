@@ -20,7 +20,7 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className='sticky top-0 z-50 h-(--h-header) shrink-0 flex items-center bg-background/80 backdrop-blur-md border-b'>
-      <div className='flex items-center justify-between gap-4 px-6 w-full max-w-[100vw] overflow-hidden'>
+      <div className='flex items-center justify-between gap-4 w-full overflow-hidden mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8'>
         {/* Left side */}
         <div className='flex items-center gap-4'>
           {showSidebarTrigger && <SidebarTrigger className='hidden md:flex' />}
