@@ -3,6 +3,7 @@ import { SignIn, SignUp } from '@/components/pages/auth';
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import type { SignInSchema, SignUpSchema } from '@/schemas/auth/auth.schema';
+import { Loader2Icon } from 'lucide-react';
 
 type AuthViewMode = 'sign-in' | 'sign-up';
 
@@ -45,6 +46,14 @@ function RouteComponent() {
   useEffect(() => {
     setErrorMessage(null);
   }, [mode]);
+
+  if (isLoading) {
+    return (
+      <div className='flex min-h-[60vh] items-center justify-center'>
+        <Loader2Icon className='h-8 w-8 animate-spin text-primary' />
+      </div>
+    );
+  }
 
   async function handleSignInSubmit(values: SignInSchema) {
     setErrorMessage(null);

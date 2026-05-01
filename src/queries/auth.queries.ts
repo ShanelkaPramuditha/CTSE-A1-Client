@@ -1,13 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/auth.service';
 import type { SignInSchema, SignUpSchema } from '@/schemas/auth/auth.schema';
-import type { User } from '@/types/auth';
+import type { DashboardRange, User, UserDashboardStats } from '@/types/auth';
+
+const hasAuthSession = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return !!window.localStorage.getItem('auth.session.startedAt');
+};
 
 export const useProfile = () => {
   return useQuery<User | null>({
     queryKey: ['profile'],
     queryFn: () => authService.getProfile(),
     retry: false,
+    enabled: hasAuthSession(),
   });
 };
 
@@ -17,6 +26,9 @@ export const useLogin = () => {
     mutationFn: (data: SignInSchema) => authService.login(data),
     onSuccess: (data) => {
       queryClient.setQueryData(['profile'], data.user);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('auth.session.startedAt', new Date().toISOString());
+      }
     },
   });
 };
@@ -34,6 +46,9 @@ export const useLogout = () => {
     onSuccess: () => {
       queryClient.setQueryData(['profile'], null);
       queryClient.clear(); // Clear all cached data on logout
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('auth.session.startedAt');
+      }
     },
   });
 };
@@ -51,5 +66,13 @@ export const useUpdateProfile = () => {
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: (data: Record<string, string>) => authService.changePassword(data),
+  });
+};
+
+export const useDashboardStats = (range: DashboardRange = '30d') => {
+  return useQuery<UserDashboardStats>({
+    queryKey: ['dashboard-stats', range],
+    queryFn: () => authService.getDashboardStats(range),
+    retry: 1,
   });
 };
