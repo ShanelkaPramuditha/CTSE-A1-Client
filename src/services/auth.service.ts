@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api';
 import type { SignInSchema, SignUpSchema } from '@/schemas/auth/auth.schema';
-import type { AuthResponse, User } from '@/types/auth';
+import type { AuthResponse, DashboardRange, User, UserDashboardStats } from '@/types/auth';
 import { toAuthResponse, toUser } from '@/mappers/auth.mapper';
 
 export const authService = {
@@ -29,5 +29,15 @@ export const authService = {
   updateProfile: async (data: Partial<User>): Promise<User> => {
     const response = await apiClient.patch('/users/profile', data);
     return toUser(response);
+  },
+
+  changePassword: async (data: Record<string, string>): Promise<void> => {
+    await apiClient.patch('/users/change-password', data);
+  },
+
+  getDashboardStats: async (range: DashboardRange = '30d'): Promise<UserDashboardStats> => {
+    return apiClient.get('/users/dashboard-stats', {
+      params: { range },
+    });
   },
 };

@@ -58,8 +58,8 @@ function AdminDashboard() {
         />
         <StatCard
           icon={<CreditCard className='h-5 w-5' />}
-          title='Revenue (USD)'
-          value='$45,210'
+          title='Revenue (LKR)'
+          value='LKR 45,210'
           change='+18.4% monthly'
           color='purple'
         />

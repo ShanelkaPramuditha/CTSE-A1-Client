@@ -1,21 +1,15 @@
-import { Monitor, Moon, Sun } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks';
 import { useNavigate } from '@tanstack/react-router';
 import { BASE_ROUTES } from '@/constants/routes';
-import { useTheme } from 'next-themes';
 import { IconUser } from '@tabler/icons-react';
 import { toast } from 'sonner';
 
@@ -62,8 +56,13 @@ export function AvatarMenu() {
               </div>
             </DropdownMenuLabel>
 
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem onClick={() => navigate({ to: BASE_ROUTES.PROFILE })}>
               Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate({ to: BASE_ROUTES.ORDERS })}>
+              Orders
             </DropdownMenuItem>
           </>
         ) : (
@@ -85,45 +84,13 @@ export function AvatarMenu() {
           </>
         )}
 
-        <DropdownMenuSeparator />
-
-        <ThemeChangeMenu />
-
         {isAuthenticated && (
           <>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={handleLogout}>Log out</DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-function ThemeChangeMenu() {
-  const { setTheme } = useTheme();
-
-  return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger className='cursor-pointer'>Theme</DropdownMenuSubTrigger>
-
-      <DropdownMenuPortal>
-        <DropdownMenuSubContent>
-          <DropdownMenuItem onSelect={() => setTheme('light')}>
-            <Sun className='mr-2 h-4 w-4' />
-            Light
-          </DropdownMenuItem>
-
-          <DropdownMenuItem onSelect={() => setTheme('dark')}>
-            <Moon className='mr-2 h-4 w-4' />
-            Dark
-          </DropdownMenuItem>
-
-          <DropdownMenuItem onSelect={() => setTheme('system')}>
-            <Monitor className='mr-2 h-4 w-4' />
-            System
-          </DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuPortal>
-    </DropdownMenuSub>
   );
 }
