@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-const paymentMethodSchema = z.enum(['COD', 'CARD']);
-
 export const shippingAddressSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   phone: z.string().min(7, 'Phone is required'),
@@ -33,4 +31,4 @@ export const checkoutSchema = z.discriminatedUnion('paymentMethod', [
 ]);
 
 export type CheckoutSchema = z.infer<typeof checkoutSchema>;
-export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+export type PaymentMethod = CheckoutSchema['paymentMethod'];

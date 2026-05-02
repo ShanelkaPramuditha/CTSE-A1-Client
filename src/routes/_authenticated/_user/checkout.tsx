@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useEffect } from 'react';
 import { PackageOpen } from 'lucide-react';
 import { toast } from 'sonner';
@@ -59,13 +59,18 @@ function CheckoutPage() {
     },
   });
 
-  const paymentMethod = form.watch('paymentMethod');
+  const { control, getValues, setValue } = form;
+
+  const paymentMethod = useWatch({
+    control,
+    name: 'paymentMethod',
+  });
 
   useEffect(() => {
     if (paymentMethod === 'CARD') {
-      const currentCard = form.getValues('card');
+      const currentCard = getValues('card');
       if (!currentCard) {
-        form.setValue('card', {
+        setValue('card', {
           cardHolderName: '',
           cardNumber: '',
           expiryMonth: '',
@@ -77,8 +82,8 @@ function CheckoutPage() {
     }
 
     // COD: ensure card details are cleared so they can't block submit.
-    form.setValue('card', undefined);
-  }, [paymentMethod, form]);
+    setValue('card', undefined);
+  }, [paymentMethod, getValues, setValue]);
 
   const onSubmit = (values: CheckoutSchema) => {
     checkout.mutate(values, {
