@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { ShoppingCart, Trash2, Plus, Minus, CreditCard, PackageOpen } from 'lucide-react';
 import {
   Card,
@@ -17,7 +17,6 @@ import {
   useRemoveCartItem,
   useClearCart,
 } from '@/queries/cart.queries';
-import { useCheckout } from '@/queries/order.queries';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute('/_authenticated/_user/cart')({
@@ -25,11 +24,11 @@ export const Route = createFileRoute('/_authenticated/_user/cart')({
 });
 
 function UserCartPage() {
+  const router = useRouter();
   const { data: cart, isLoading, isError } = useCart();
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
   const clearCart = useClearCart();
-  const checkout = useCheckout();
 
   const handleUpdateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -65,14 +64,7 @@ function UserCartPage() {
   };
 
   const handleCheckout = () => {
-    checkout.mutate(undefined, {
-      onSuccess: (order) => {
-        toast.success(`Order placed successfully (${order.status})`);
-      },
-      onError: (error) => {
-        toast.error(error.message || 'Failed to place order');
-      },
-    });
+    router.navigate({ to: '/checkout' });
   };
 
   if (isLoading) {
@@ -214,10 +206,10 @@ function UserCartPage() {
                   className='w-full h-12 shadow-md shadow-primary/20'
                   size='lg'
                   onClick={handleCheckout}
-                  disabled={checkout.isPending || items.length === 0}
+                  disabled={items.length === 0}
                 >
                   <CreditCard className='h-5 w-5 mr-4' />
-                  {checkout.isPending ? 'Processing Order...' : 'Proceed to Payment'}
+                  Proceed to Payment
                 </Button>
               </CardFooter>
             </Card>

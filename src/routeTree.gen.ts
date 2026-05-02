@@ -16,6 +16,7 @@ import { Route as AuthenticatedUserRouteImport } from './routes/_authenticated/_
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
 import { Route as PublicProductsProductIdRouteImport } from './routes/_public/products/$productId'
 import { Route as AuthenticatedUserOrdersRouteImport } from './routes/_authenticated/_user/orders'
+import { Route as AuthenticatedUserCheckoutRouteImport } from './routes/_authenticated/_user/checkout'
 import { Route as AuthenticatedUserCartRouteImport } from './routes/_authenticated/_user/cart'
 import { Route as AuthenticatedUserProfileIndexRouteImport } from './routes/_authenticated/_user/profile/index'
 import { Route as AuthenticatedAdminAdminIndexRouteImport } from './routes/_authenticated/_admin/admin/index'
@@ -53,6 +54,12 @@ const AuthenticatedUserOrdersRoute = AuthenticatedUserOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AuthenticatedUserRoute,
 } as any)
+const AuthenticatedUserCheckoutRoute =
+  AuthenticatedUserCheckoutRouteImport.update({
+    id: '/checkout',
+    path: '/checkout',
+    getParentRoute: () => AuthenticatedUserRoute,
+  } as any)
 const AuthenticatedUserCartRoute = AuthenticatedUserCartRouteImport.update({
   id: '/cart',
   path: '/cart',
@@ -81,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$authView': typeof AuthViewRoute
   '/cart': typeof AuthenticatedUserCartRoute
+  '/checkout': typeof AuthenticatedUserCheckoutRoute
   '/orders': typeof AuthenticatedUserOrdersRoute
   '/products/$productId': typeof PublicProductsProductIdRoute
   '/admin/products': typeof AuthenticatedAdminAdminProductsRoute
@@ -91,6 +99,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$authView': typeof AuthViewRoute
   '/cart': typeof AuthenticatedUserCartRoute
+  '/checkout': typeof AuthenticatedUserCheckoutRoute
   '/orders': typeof AuthenticatedUserOrdersRoute
   '/products/$productId': typeof PublicProductsProductIdRoute
   '/admin/products': typeof AuthenticatedAdminAdminProductsRoute
@@ -105,6 +114,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/_user': typeof AuthenticatedUserRouteWithChildren
   '/_authenticated/_user/cart': typeof AuthenticatedUserCartRoute
+  '/_authenticated/_user/checkout': typeof AuthenticatedUserCheckoutRoute
   '/_authenticated/_user/orders': typeof AuthenticatedUserOrdersRoute
   '/_public/products/$productId': typeof PublicProductsProductIdRoute
   '/_authenticated/_admin/admin/products': typeof AuthenticatedAdminAdminProductsRoute
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$authView'
     | '/cart'
+    | '/checkout'
     | '/orders'
     | '/products/$productId'
     | '/admin/products'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$authView'
     | '/cart'
+    | '/checkout'
     | '/orders'
     | '/products/$productId'
     | '/admin/products'
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin'
     | '/_authenticated/_user'
     | '/_authenticated/_user/cart'
+    | '/_authenticated/_user/checkout'
     | '/_authenticated/_user/orders'
     | '/_public/products/$productId'
     | '/_authenticated/_admin/admin/products'
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUserOrdersRouteImport
       parentRoute: typeof AuthenticatedUserRoute
     }
+    '/_authenticated/_user/checkout': {
+      id: '/_authenticated/_user/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof AuthenticatedUserCheckoutRouteImport
+      parentRoute: typeof AuthenticatedUserRoute
+    }
     '/_authenticated/_user/cart': {
       id: '/_authenticated/_user/cart'
       path: '/cart'
@@ -251,12 +271,14 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedUserRouteChildren {
   AuthenticatedUserCartRoute: typeof AuthenticatedUserCartRoute
+  AuthenticatedUserCheckoutRoute: typeof AuthenticatedUserCheckoutRoute
   AuthenticatedUserOrdersRoute: typeof AuthenticatedUserOrdersRoute
   AuthenticatedUserProfileIndexRoute: typeof AuthenticatedUserProfileIndexRoute
 }
 
 const AuthenticatedUserRouteChildren: AuthenticatedUserRouteChildren = {
   AuthenticatedUserCartRoute: AuthenticatedUserCartRoute,
+  AuthenticatedUserCheckoutRoute: AuthenticatedUserCheckoutRoute,
   AuthenticatedUserOrdersRoute: AuthenticatedUserOrdersRoute,
   AuthenticatedUserProfileIndexRoute: AuthenticatedUserProfileIndexRoute,
 }

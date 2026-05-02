@@ -31,7 +31,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { productService } from '@/services/product.service';
 import type { Product, PagedProductsResponse } from '@/types/product';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useCreateProduct } from '@/queries/product.queries';
@@ -138,7 +147,9 @@ function AdminProductsManagement() {
                     toast.success('Product created successfully');
                   },
                   onError: (error) => {
-                    toast.error(error instanceof Error ? error.message : 'Failed to create product');
+                    toast.error(
+                      error instanceof Error ? error.message : 'Failed to create product',
+                    );
                   },
                 });
               }}
@@ -163,7 +174,9 @@ function AdminProductsManagement() {
                 </div>
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button type='button' variant='outline'>Cancel</Button>
+                    <Button type='button' variant='outline'>
+                      Cancel
+                    </Button>
                   </DialogClose>
                   <Button type='submit' disabled={createMutation.isLoading}>
                     {createMutation.isLoading ? 'Creating...' : 'Create Product'}
